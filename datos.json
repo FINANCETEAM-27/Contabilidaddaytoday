@@ -1,0 +1,23 @@
+{
+  "estadisticas": {
+    "ingresos": "19,0 MM",
+    "costo_ventas": "10,5 MM",
+    "utilidad_bruta": "8,4 MM",
+    "gastos": "8,9 MM",
+    "resultado_neto": "-399,6 M"
+  },
+  "bancos": {
+    "Bancolombia": { "cuenta": "Cta Corriente #8912", "saldo": 145820400, "actualizado": "Hoy, 11:30 AM" },
+    "Davivienda": { "cuenta": "Cta Ahorros #3321", "saldo": 84310200, "actualizado": "Hoy, 10:15 AM" },
+    "Banco de Bogotá": { "cuenta": "Cta Corriente #1104", "saldo": 32450000, "actualizado": "Hoy, 09:00 AM" },
+    "BBVA": { "cuenta": "Cta Ahorros #9023", "saldo": 18720000, "actualizado": "Ayer, 05:00 PM" }
+  },
+  "movimientos": [
+    { "id": 1, "banco": "Bancolombia", "fecha": "2026-10-19", "descripcion": "Pago Proveedor DIAN Fac-902", "valor": 4500000, "tipo": "credito" },
+    { "id": 2, "banco": "Bancolombia", "fecha": "2026-10-19", "descripcion": "Recaudo Clientes PSE Fac-104", "valor": 12800000, "tipo": "debito" }
+  ],
+  "facturas": [
+    { "id": "FE-2041", "tercero": "LOGÍSTICA AERONÁUTICA SAS", "valor": 14200000, "estado": "verde", "siigo": "Causada" },
+    { "id": "FE-2042", "tercero": "COMBUSTIBLES DEL VALLE", "valor": 8900000, "estado": "amarillo", "siigo": "Tercero Nuevo" }
+  ]
+}
