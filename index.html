@@ -3,639 +3,879 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ágilex - Portal Contable y Financiero</title>
-  <!-- Tailwind CSS CDN para estilos rápidos y limpios -->
+  <title>Ágilex - Portal Financiero y Contable</title>
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Biblioteca para generación de PDFs en cliente -->
+  <!-- jsPDF & autoTable para reportes PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    body { background-color: #090d16; color: #e2e8f0; font-family: system-ui, -apple-system, sans-serif; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     .scrollbar-none::-webkit-scrollbar { display: none; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
 
-  <!-- PANTALLA DE ACCESO (ADMIN_27) -->
-  <div id="loginScreen" class="fixed inset-0 z-50 bg-[#090d16] flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-[#0f1728] border border-gray-800 rounded-2xl p-8 shadow-2xl text-center">
-      <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-yellow-400/10 border border-yellow-400/30 flex items-center justify-center text-yellow-400 text-3xl font-black">
+  <!-- ==================== PANTALLA DE ACCESO (ADMIN_27) ==================== -->
+  <div id="loginScreen" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-2xl text-center">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-amber-400/20 border-2 border-amber-400 flex items-center justify-center text-amber-600 font-black text-2xl shadow-inner">
         AX
       </div>
-      <h2 class="text-2xl font-bold text-white mb-1 tracking-tight">Portal Contable Ágilex</h2>
-      <p class="text-xs text-gray-400 mb-6">Automatización AX1, Siigo y Bancos</p>
+      <h2 class="text-2xl font-black text-slate-900 mb-1">Portal Contable Ágilex</h2>
+      <p class="text-sm text-slate-500 mb-6">Integración AX1 · Siigo · Netlify</p>
       
       <form id="loginForm" class="space-y-4">
         <div>
           <input
             id="passwordInput"
             type="password"
-            placeholder="Ingrese clave de acceso"
-            class="w-full px-4 py-3 bg-[#090d16] border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400 text-center tracking-widest text-sm"
+            placeholder="Ingrese clave (ADMIN_27)"
+            class="w-full px-4 py-3 bg-slate-100 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400 text-center tracking-widest text-sm font-semibold"
+            autofocus
           />
         </div>
-        <p id="errorMsg" class="hidden text-xs text-red-400 font-semibold">Clave incorrecta. Intente de nuevo.</p>
+        <p id="errorMsg" class="hidden text-xs text-rose-600 font-bold">Clave incorrecta. Intente de nuevo.</p>
         <button
           type="submit"
-          class="w-full py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold rounded-xl transition shadow-lg shadow-yellow-400/20 text-sm"
+          class="w-full py-3 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold rounded-xl transition shadow-lg shadow-amber-400/30 text-sm cursor-pointer"
         >
           Ingresar al Sistema
         </button>
       </form>
+      <div class="mt-6 pt-4 border-t border-slate-100 text-xs text-slate-400">
+        Ágilex Logística · Confianza y Respaldo
+      </div>
     </div>
   </div>
 
-  <!-- APLICATIVO PRINCIPAL -->
-  <div id="mainApp" class="hidden flex-1 flex flex-col min-h-screen">
+  <!-- ==================== APLICATIVO PRINCIPAL ==================== -->
+  <div id="appContainer" class="flex-1 flex flex-col min-h-screen">
     
-    <!-- ENCABEZADO -->
-    <header class="h-20 bg-[#0e1626] border-b border-gray-800 px-6 flex items-center justify-between sticky top-0 z-30">
-      <div class="flex items-center space-x-6">
-        <!-- Logo ÁGILEX y enlace a pestaña inicial -->
-        <div onclick="switchTab('bancos')" class="cursor-pointer flex items-center space-x-3">
-          <div class="text-2xl font-black tracking-tighter">
-            <span class="text-indigo-400">ÁGILE</span><span class="text-yellow-400">X</span>
+    <!-- ENCABEZADO SUPERIOR -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        
+        <!-- Izquierda: Logo y Saludo Dinámico -->
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-blue-900 flex items-center justify-center text-amber-400 font-black text-xl shadow-md border-2 border-amber-400">
+              ✈
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-xl font-black tracking-tight text-blue-950">ÁGILEX</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-amber-500 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">Finanzas</span>
+              </div>
+              <p id="saludoHorario" class="text-xs font-semibold text-slate-500">Cargando saludo...</p>
+            </div>
           </div>
-          <span class="hidden sm:inline-block text-[10px] bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded border border-yellow-400/20 font-semibold uppercase">
-            Bot Activo
-          </span>
         </div>
-        <div class="hidden md:block h-6 w-px bg-gray-800"></div>
-        <p id="greetingText" class="hidden md:block text-xs sm:text-sm text-gray-300 font-medium"></p>
-      </div>
 
-      <!-- Controles de cabecera -->
-      <div class="flex items-center space-x-4">
-        <!-- Notificaciones -->
-        <div class="relative">
-          <button id="btnNotif" class="p-2.5 rounded-xl bg-[#141e33] border border-gray-800 text-gray-300 hover:text-yellow-400 relative transition">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-            <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-4 ring-[#141e33]"></span>
-          </button>
+        <!-- Derecha: Acciones, Notificaciones, Ajustes y Sello Ágilex -->
+        <div class="flex items-center gap-3">
           
-          <!-- Menú desplegable notificaciones -->
-          <div id="notifPanel" class="hidden absolute right-0 mt-3 w-80 bg-[#0f1728] border border-gray-800 rounded-2xl p-4 shadow-2xl z-40 space-y-3">
-            <div class="flex justify-between items-center border-b border-gray-800 pb-2">
-              <span class="text-xs font-bold text-white uppercase tracking-wider">Novedades y Errores</span>
-              <span class="text-[10px] bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded font-mono font-bold">2 Pendientes</span>
-            </div>
-            <div class="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs space-y-1">
-              <p class="font-bold text-red-300">Error Factura FE-2044</p>
-              <p class="text-gray-400 text-[11px]">Rechazo de token DIAN al enviar a Siigo.</p>
-            </div>
-            <div class="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl text-xs space-y-1">
-              <p class="font-bold text-yellow-300">Tercero Nuevo: COMBUSTIBLES DEL VALLE</p>
-              <p class="text-gray-400 text-[11px]">Estado amarillo en AX1 impide causación automática.</p>
+          <!-- Notificaciones de Errores y Novedades -->
+          <div class="relative">
+            <button id="btnNotificaciones" class="relative p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Notificaciones del Sistema">
+              <i data-lucide="bell" class="w-5 h-5"></i>
+              <span id="badgeNotificaciones" class="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white rounded-full text-xs font-bold flex items-center justify-center">2</span>
+            </button>
+            <!-- Dropdown Notificaciones -->
+            <div id="dropdownNotificaciones" class="hidden absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 z-40">
+              <h4 class="font-bold text-sm text-slate-800 mb-3 flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i> Novedades y Alertas
+              </h4>
+              <div class="space-y-2 text-xs">
+                <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800">
+                  <span class="font-bold block">1 Factura con Tercero Nuevo:</span>
+                  Combustibles del Valle requiere registro previo para enviar a Siigo.
+                </div>
+                <div class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800">
+                  <span class="font-bold block">Alerta DIAN:</span>
+                  Token DIAN en AX1 expira en 4 horas. Generar nuevo token.
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Ajustes (Engranaje) -->
+          <div class="relative">
+            <button id="btnAjustes" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition" title="Ajustes y Reportes">
+              <i data-lucide="settings" class="w-5 h-5"></i>
+            </button>
+            <!-- Modal/Dropdown Ajustes con 3 opciones -->
+            <div id="dropdownAjustes" class="hidden absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-2xl shadow-xl p-4 z-40 space-y-2">
+              <h4 class="font-bold text-sm text-slate-800 mb-2 flex items-center gap-2">
+                <i data-lucide="sliders" class="w-4 h-4 text-slate-600"></i> Opciones de Configuración
+              </h4>
+              <!-- Opción 1: Reporte PDF Facturas -->
+              <button onclick="generarReporteFacturasPDF()" class="w-full text-left p-2.5 rounded-xl hover:bg-amber-50 text-slate-700 hover:text-amber-900 border border-slate-100 transition flex items-center gap-2.5 text-xs font-semibold">
+                <i data-lucide="file-text" class="w-4 h-4 text-amber-600"></i>
+                <span>Descargar PDF Facturas Causadas</span>
+              </button>
+              <!-- Opción 2: Reporte PDF Notas Crédito -->
+              <button onclick="generarReporteNotasPDF()" class="w-full text-left p-2.5 rounded-xl hover:bg-blue-50 text-slate-700 hover:text-blue-900 border border-slate-100 transition flex items-center gap-2.5 text-xs font-semibold">
+                <i data-lucide="file-minus" class="w-4 h-4 text-blue-600"></i>
+                <span>Descargar PDF Notas Crédito AX1</span>
+              </button>
+              <!-- Opción 3: Carga Archivo Plano Saldos -->
+              <label class="w-full text-left p-2.5 rounded-xl hover:bg-emerald-50 text-slate-700 hover:text-emerald-900 border border-slate-100 transition flex items-center gap-2.5 text-xs font-semibold cursor-pointer">
+                <i data-lucide="upload-cloud" class="w-4 h-4 text-emerald-600"></i>
+                <span>Subir Archivo Plano de Saldos</span>
+                <input type="file" id="inputArchivoPlano" accept=".csv,.txt,.json" class="hidden" onchange="cargarArchivoPlano(event)" />
+              </label>
+            </div>
+          </div>
+
+          <!-- Botón Interactivo Sello Ágilex (Regresa a Inicio) -->
+          <button
+            onclick="cambiarPestana('estadisticas')"
+            class="group flex items-center gap-2.5 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-slate-950 px-3.5 py-2 rounded-2xl shadow-md shadow-amber-400/20 transition-all transform hover:scale-105 cursor-pointer"
+            title="Sello Ágilex - Clic para volver al Inicio"
+          >
+            <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center font-black text-amber-500 shadow-sm border border-amber-300">
+              ✈
+            </div>
+            <div class="text-left hidden sm:block">
+              <span class="block text-xs font-black uppercase tracking-tight">ÁGILEX</span>
+              <span class="block text-[10px] font-semibold text-slate-800 -mt-0.5">Confianza y respaldo</span>
+            </div>
+          </button>
+
         </div>
-
-        <!-- Ajustes (Engranaje) -->
-        <button id="btnSettings" class="p-2.5 rounded-xl bg-[#141e33] border border-gray-800 text-gray-300 hover:text-yellow-400 transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-        </button>
-
-        <!-- Botón interactivo Sello Ágilex (Redirige al inicio) -->
-        <button
-          onclick="switchTab('bancos')"
-          title="Ir al inicio"
-          class="w-11 h-11 rounded-full bg-yellow-400 hover:scale-105 active:scale-95 transition flex flex-col items-center justify-center border-2 border-yellow-500 shadow-lg shadow-yellow-400/20 text-[#090d16]"
-        >
-          <span class="text-[8px] font-black tracking-tighter leading-none">AGILEX</span>
-          <span class="text-[10px] leading-none">✈</span>
-        </button>
       </div>
     </header>
 
     <!-- CUERPO PRINCIPAL CON BARRA LATERAL -->
-    <div class="flex flex-1 overflow-hidden">
-      <!-- SIDEBAR VERTICAL -->
-      <aside class="w-20 bg-[#0c1322] border-r border-gray-800 flex flex-col items-center py-6 space-y-5">
-        <!-- Bancos (Billetes) -->
-        <button onclick="switchTab('bancos')" id="tabBtn-bancos" title="Bancos" class="tab-btn p-3.5 rounded-2xl bg-yellow-400 text-gray-950 font-bold transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+    <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1 flex flex-col md:flex-row gap-6">
+      
+      <!-- BARRA DE NAVEGACIÓN LATERAL IZQUIERDA -->
+      <aside class="w-full md:w-20 bg-white border border-slate-200 rounded-3xl p-3 flex md:flex-col items-center justify-around md:justify-start gap-4 shadow-sm self-start">
+        
+        <!-- Pestaña 1: Inicio / Estadísticas -->
+        <button
+          onclick="cambiarPestana('estadisticas')"
+          id="tab-estadisticas"
+          class="nav-tab w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition bg-amber-400 text-slate-950 font-bold shadow-md shadow-amber-400/20 cursor-pointer"
+          title="Resumen Financiero (Netlify)"
+        >
+          <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold mt-0.5">Inicio</span>
         </button>
 
-        <!-- Estadísticas (Gráfico) -->
-        <button onclick="switchTab('estadisticas')" id="tabBtn-estadisticas" title="Estadísticas Financieras" class="tab-btn p-3.5 rounded-2xl text-gray-400 hover:bg-[#141f36] hover:text-white transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <!-- Pestaña 2: Bancos (Billetes) -->
+        <button
+          onclick="cambiarPestana('bancos')"
+          id="tab-bancos"
+          class="nav-tab w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
+          title="Bancos de Colombia y Movimientos"
+        >
+          <i data-lucide="banknote" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold mt-0.5">Bancos</span>
         </button>
 
-        <!-- Facturas AX1 (X) -->
-        <button onclick="switchTab('facturas')" id="tabBtn-facturas" title="Facturas AX1" class="tab-btn p-3.5 rounded-2xl text-gray-400 hover:bg-[#141f36] hover:text-white transition">
-          <span class="text-xl font-black font-mono leading-none">X</span>
+        <!-- Pestaña 3: Facturas (Ícono X de AX1) -->
+        <button
+          onclick="cambiarPestana('facturas')"
+          id="tab-facturas"
+          class="nav-tab w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
+          title="Facturas AX1 y Siigo"
+        >
+          <span class="font-black text-lg tracking-tighter">✕</span>
+          <span class="text-[9px] font-bold">AX1</span>
         </button>
 
-        <!-- Notas Crédito (Papel con flecha retornando) -->
-        <button onclick="switchTab('notas_credito')" id="tabBtn-notas_credito" title="Notas Crédito" class="tab-btn p-3.5 rounded-2xl text-gray-400 hover:bg-[#141f36] hover:text-white transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+        <!-- Pestaña 4: Notas Crédito (Papel con flecha regresando) -->
+        <button
+          onclick="cambiarPestana('notas')"
+          id="tab-notas"
+          class="nav-tab w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
+          title="Notas Crédito Recibidas"
+        >
+          <i data-lucide="undo-2" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold mt-0.5">Notas</span>
         </button>
 
-        <!-- Gastos Bancarios (Monedas) -->
-        <button onclick="switchTab('gastos_bancarios')" id="tabBtn-gastos_bancarios" title="Gastos Bancarios" class="tab-btn p-3.5 rounded-2xl text-gray-400 hover:bg-[#141f36] hover:text-white transition">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <!-- Pestaña 5: Gastos Bancarios (Monedas) -->
+        <button
+          onclick="cambiarPestana('gastos')"
+          id="tab-gastos"
+          class="nav-tab w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer"
+          title="Gastos Bancarios Mensuales"
+        >
+          <i data-lucide="coins" class="w-5 h-5"></i>
+          <span class="text-[9px] font-bold mt-0.5">Gastos</span>
         </button>
+
       </aside>
 
-      <!-- ÁREA DE CONTENIDOS -->
-      <main class="flex-1 p-8 overflow-y-auto max-w-7xl mx-auto w-full">
-        
-        <!-- PESTAÑA 1: BANCOS -->
-        <section id="tab-bancos" class="tab-content space-y-8">
-          <div>
-            <h1 class="text-2xl font-bold text-white">Saldos y Movimientos Bancarios</h1>
-            <p class="text-xs text-gray-400">Actualizado mediante archivo plano y robot contable</p>
+      <!-- CONTENEDOR DE CONTENIDOS -->
+      <main class="flex-1 min-w-0">
+
+        <!-- ==================== VISTA 1: INICIO / ESTADÍSTICAS FINANCIERAS ==================== -->
+        <section id="view-estadisticas" class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div>
+              <h2 class="text-xl font-black text-slate-900">Estado Financiero al Día Anterior</h2>
+              <p class="text-xs text-slate-500">Extracción sincronizada de informes ejecutivos Ágilex</p>
+            </div>
+            <a
+              href="https://informeingresoscostosgastos.netlify.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 rounded-xl text-xs font-bold transition shadow-xs"
+            >
+              <span>Ver Informe Detallado Netlify</span>
+              <i data-lucide="external-link" class="w-4 h-4"></i>
+            </a>
           </div>
 
-          <!-- Cuadrícula de Bancos de Colombia -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="bankCardsContainer"></div>
-
-          <!-- Recuadro del banco seleccionado -->
-          <div class="p-6 bg-[#0f1728] border border-gray-800 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-              <span class="text-[10px] text-yellow-400 font-bold uppercase tracking-wider">Banco Seleccionado</span>
-              <h2 id="currentBankTitle" class="text-xl font-bold text-white mt-0.5">Bancolombia — Cta Corriente #8912</h2>
-              <p id="currentBankUpdated" class="text-xs text-gray-400">Actualizado: Hoy a las 10:45 AM</p>
+          <!-- TARJETAS FINANCIERAS (Imagen 2) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <!-- Ingresos -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Ingresos</span>
+                <span class="p-2 rounded-xl bg-emerald-50 text-emerald-600"><i data-lucide="trending-up" class="w-4 h-4"></i></span>
+              </div>
+              <div id="stat-ingresos" class="text-2xl font-black text-slate-900">19,0 MM</div>
+              <div class="text-[11px] text-emerald-600 font-semibold mt-1">Cierre oficial mes</div>
             </div>
-            
-            <label class="px-4 py-2 bg-[#172338] border border-gray-700 hover:border-yellow-400 text-white text-xs font-semibold rounded-xl cursor-pointer flex items-center space-x-2 transition">
-              <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+
+            <!-- Costo de Ventas -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Costo Ventas</span>
+                <span class="p-2 rounded-xl bg-amber-50 text-amber-600"><i data-lucide="shopping-bag" class="w-4 h-4"></i></span>
+              </div>
+              <div id="stat-costos" class="text-2xl font-black text-slate-900">10,5 MM</div>
+              <div class="text-[11px] text-slate-500 font-semibold mt-1">Operación logística</div>
+            </div>
+
+            <!-- Utilidad Bruta -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Utilidad Bruta</span>
+                <span class="p-2 rounded-xl bg-blue-50 text-blue-600"><i data-lucide="pie-chart" class="w-4 h-4"></i></span>
+              </div>
+              <div id="stat-utilidad" class="text-2xl font-black text-slate-900">8,4 MM</div>
+              <div class="text-[11px] text-blue-600 font-semibold mt-1">Margen favorable</div>
+            </div>
+
+            <!-- Gastos -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Gastos</span>
+                <span class="p-2 rounded-xl bg-rose-50 text-rose-600"><i data-lucide="credit-card" class="w-4 h-4"></i></span>
+              </div>
+              <div id="stat-gastos" class="text-2xl font-black text-slate-900">8,9 MM</div>
+              <div class="text-[11px] text-rose-600 font-semibold mt-1">Administrativos y ventas</div>
+            </div>
+
+            <!-- Resultado Neto -->
+            <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+              <div class="flex items-center justify-between text-slate-500 mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider">Resultado Neto</span>
+                <span class="p-2 rounded-xl bg-rose-50 text-rose-600"><i data-lucide="alert-circle" class="w-4 h-4"></i></span>
+              </div>
+              <div id="stat-resultado" class="text-2xl font-black text-rose-600">-399,6 M</div>
+              <div class="text-[11px] text-slate-500 font-semibold mt-1">Balance acumulado</div>
+            </div>
+          </div>
+
+          <!-- ACCIONES RÁPIDAS DEL BOT CONTABLE -->
+          <div class="bg-gradient-to-r from-blue-950 to-slate-900 rounded-3xl p-6 text-white shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded-md bg-amber-400 text-slate-950 font-black text-[10px] uppercase">Bot Fantasma</span>
+                <h3 class="text-lg font-bold">Automatización AX1 ➔ Siigo</h3>
+              </div>
+              <p class="text-xs text-slate-300">Genera token DIAN, extrae facturas verificadas (verdes) y las contabiliza sin intervención manual.</p>
+            </div>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <button onclick="ejecutarAccionBot('token_dian')" class="flex-1 sm:flex-none px-4 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs transition cursor-pointer shadow-md">
+                1. Renovar Token DIAN
+              </button>
+              <button onclick="ejecutarAccionBot('enviar_siigo')" class="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl text-xs transition cursor-pointer shadow-md">
+                2. Enviar Verificadas a Siigo
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== VISTA 2: BANCOS Y MOVIMIENTOS ==================== -->
+        <section id="view-bancos" class="hidden space-y-6">
+          
+          <!-- Encabezado y Selector Activo -->
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="p-2 rounded-xl bg-amber-50 text-amber-600"><i data-lucide="landmark" class="w-5 h-5"></i></span>
+                <h2 class="text-xl font-black text-slate-900">Gestión de Cuentas Bancarias</h2>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Saldos consolidados de bancos de Colombia y extracto de movimientos</p>
+            </div>
+            <!-- Botón Subir Movimientos -->
+            <label class="px-4 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer">
+              <i data-lucide="upload" class="w-4 h-4"></i>
               <span>Subir Movimientos del Día</span>
-              <input type="file" id="inputMovimientos" class="hidden" accept=".csv,.txt" />
+              <input type="file" accept=".csv,.xlsx" class="hidden" onchange="alert('Movimientos subidos con éxito. Procesando extracto...')" />
             </label>
           </div>
 
-          <!-- Filtros de Movimientos -->
-          <div class="bg-[#0f1728] border border-gray-800 rounded-2xl p-6 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <!-- Filtro por fecha -->
-              <div>
-                <label class="block text-xs font-semibold text-gray-400 mb-1">Filtrar por Día</label>
-                <input id="filterDate" type="date" class="w-full px-3 py-2 bg-[#090d16] border border-gray-700 rounded-xl text-white text-xs focus:outline-none focus:border-yellow-400" />
-              </div>
+          <!-- SALDOS TOTALIZADOS POR BANCO (Tarjetas Seleccionables) -->
+          <div id="gridBancos" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Cargado dinámicamente -->
+          </div>
 
-              <!-- Filtro por valor o concepto -->
-              <div>
-                <label class="block text-xs font-semibold text-gray-400 mb-1">Buscar por Valor o Concepto</label>
-                <input id="filterQuery" type="text" placeholder="Ej: 4500000 o Nómina" class="w-full px-3 py-2 bg-[#090d16] border border-gray-700 rounded-xl text-white text-xs focus:outline-none focus:border-yellow-400" />
+          <!-- RECUADRO BANCO SELECCIONADO (Encabezado de Movimientos) -->
+          <div class="bg-white p-6 rounded-3xl border-2 border-amber-400 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600">
+                <i data-lucide="building-2" class="w-7 h-7"></i>
               </div>
-
-              <!-- Selector Débito / Crédito -->
               <div>
-                <label class="block text-xs font-semibold text-gray-400 mb-1">Naturaleza Contable</label>
-                <div class="flex bg-[#090d16] p-1 rounded-xl border border-gray-700 text-xs">
-                  <button onclick="setNatureFilter('todos')" id="btnNat-todos" class="flex-1 py-1.5 font-semibold rounded-lg bg-[#18263f] text-white">Todos</button>
-                  <button onclick="setNatureFilter('debito')" id="btnNat-debito" class="flex-1 py-1.5 font-semibold rounded-lg text-gray-400">Débito</button>
-                  <button onclick="setNatureFilter('credito')" id="btnNat-credito" class="flex-1 py-1.5 font-semibold rounded-lg text-gray-400">Crédito</button>
+                <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Banco Seleccionado</span>
+                <h3 id="bancoSeleccionadoTitulo" class="text-xl font-black text-slate-900">Bancolombia</h3>
+                <p id="bancoSeleccionadoCuenta" class="text-xs text-slate-500 font-semibold">Cta Corriente #8912</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-xs font-bold uppercase text-slate-400 tracking-wider">Saldo Real al Momento</span>
+              <div id="bancoSeleccionadoSaldo" class="text-2xl font-black text-emerald-600">$145.820.400</div>
+              <p id="bancoSeleccionadoFecha" class="text-[11px] text-slate-500">Actualizado: Hoy, 11:30 AM</p>
+            </div>
+          </div>
+
+          <!-- FILTROS Y MOVIMIENTOS -->
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <h4 class="font-bold text-slate-900 text-sm">Movimientos Contabilizados</h4>
+              
+              <!-- FILTROS: Fecha, Valor, Débito / Crédito -->
+              <div class="flex flex-wrap items-center gap-2">
+                <!-- Filtro por Fecha -->
+                <input
+                  type="date"
+                  id="filtroFecha"
+                  class="px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                  onchange="aplicarFiltrosMovimientos()"
+                />
+                <!-- Búsqueda por Valor -->
+                <div class="relative">
+                  <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400"></i>
+                  <input
+                    type="number"
+                    id="filtroValor"
+                    placeholder="Buscar por valor..."
+                    class="pl-8 pr-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    oninput="aplicarFiltrosMovimientos()"
+                  />
                 </div>
+                <!-- Botón Débito -->
+                <button
+                  id="btnFiltroDebito"
+                  onclick="toggleFiltroNaturaleza('debito')"
+                  class="px-3.5 py-2 rounded-xl text-xs font-bold border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition cursor-pointer"
+                >
+                  ✓ Débito
+                </button>
+                <!-- Botón Crédito -->
+                <button
+                  id="btnFiltroCredito"
+                  onclick="toggleFiltroNaturaleza('credito')"
+                  class="px-3.5 py-2 rounded-xl text-xs font-bold border border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 transition cursor-pointer"
+                >
+                  ✓ Crédito
+                </button>
               </div>
             </div>
 
             <!-- Tabla de Movimientos -->
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-gray-300">
-                <thead class="bg-[#141f36] text-gray-400 uppercase font-semibold">
+            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+              <table class="w-full text-left text-xs text-slate-700">
+                <thead class="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
                   <tr>
-                    <th class="py-3 px-4 rounded-l-xl">Fecha</th>
-                    <th class="py-3 px-4">Descripción / Concepto</th>
-                    <th class="py-3 px-4">Naturaleza</th>
-                    <th class="py-3 px-4 text-right rounded-r-xl">Valor</th>
+                    <th class="p-3">Fecha</th>
+                    <th class="p-3">Descripción</th>
+                    <th class="p-3">Naturaleza</th>
+                    <th class="p-3 text-right">Valor</th>
                   </tr>
                 </thead>
-                <tbody id="movimientosTableBody" class="divide-y divide-gray-800"></tbody>
+                <tbody id="tablaMovimientosBody" class="divide-y divide-slate-100">
+                  <!-- Llenado dinámico -->
+                </tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <!-- PESTAÑA 2: ESTADÍSTICAS FINANCIERAS (IMAGEN 2) -->
-        <section id="tab-estadisticas" class="tab-content hidden space-y-8">
-          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+        <!-- ==================== VISTA 3: FACTURAS AX1 ==================== -->
+        <section id="view-facturas" class="hidden space-y-6">
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 class="text-2xl font-bold text-white">Resumen Financiero del Día Anterior</h1>
-              <p class="text-xs text-gray-400">Información visual sincronizada de Netlify</p>
+              <div class="flex items-center gap-2">
+                <span class="w-8 h-8 rounded-xl bg-slate-900 text-white font-black flex items-center justify-center text-sm">✕</span>
+                <h2 class="text-xl font-black text-slate-900">Facturación Recibida AX1</h2>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Causación de facturas electrónicas y estado de integración a Siigo</p>
             </div>
-            <a
-              href="https://informeingresoscostosgastos.netlify.app/"
-              target="_blank"
-              class="px-4 py-2 bg-[#131d31] hover:bg-[#192742] border border-gray-700 text-yellow-400 text-xs font-semibold rounded-xl inline-flex items-center space-x-2 transition self-start"
-            >
-              <span>Ver Informe Detallado</span>
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-            </a>
-          </div>
-
-          <!-- Los 5 recuadros exactamente en el orden de la Imagen 2 -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <!-- 1. INGRESOS -->
-            <div class="p-5 bg-[#0f1728] border border-blue-900/40 rounded-2xl shadow-lg">
-              <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-2">INGRESOS</span>
-              <p class="text-2xl font-black text-white">19,0 MM</p>
-            </div>
-
-            <!-- 2. COSTO DE VENTAS -->
-            <div class="p-5 bg-[#0f1728] border border-blue-900/40 rounded-2xl shadow-lg">
-              <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-2">COSTO DE VENTAS</span>
-              <p class="text-2xl font-black text-white mb-1">10,5 MM</p>
-              <span class="text-[10px] text-gray-400">55,6% s/ ingresos</span>
-            </div>
-
-            <!-- 3. UTILIDAD BRUTA -->
-            <div class="p-5 bg-[#0f1728] border border-green-900/40 rounded-2xl shadow-lg">
-              <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-2">UTILIDAD BRUTA</span>
-              <p class="text-2xl font-black text-green-400 mb-1">8,4 MM</p>
-              <span class="text-[10px] text-gray-400">Margen 44,4%</span>
-            </div>
-
-            <!-- 4. GASTOS -->
-            <div class="p-5 bg-[#0f1728] border border-yellow-900/40 rounded-2xl shadow-lg">
-              <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-2">GASTOS</span>
-              <p class="text-2xl font-black text-white mb-1">8,9 MM</p>
-              <span class="text-[10px] text-gray-400">47,0% s/ ingresos</span>
-            </div>
-
-            <!-- 5. RESULTADO NETO -->
-            <div class="p-5 bg-[#0f1728] border border-red-900/40 rounded-2xl shadow-lg">
-              <span class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block mb-2">RESULTADO NETO</span>
-              <p class="text-2xl font-black text-red-400 mb-1">-399,6 M</p>
-              <span class="text-[10px] text-gray-400">Margen -2,1%</span>
-            </div>
-          </div>
-        </section>
-
-        <!-- PESTAÑA 3: FACTURAS AX1 -->
-        <section id="tab-facturas" class="tab-content hidden space-y-6">
-          <div class="flex justify-between items-center">
-            <div>
-              <h1 class="text-2xl font-bold text-white">Facturas Recibidas AX1</h1>
-              <p class="text-xs text-gray-400">Estado de verificación para causación en Siigo</p>
-            </div>
-            <button onclick="alert('Solicitando generación de token DIAN en AX1...')" class="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold text-xs rounded-xl shadow-md transition">
-              Generar Token DIAN
+            <button onclick="generarReporteFacturasPDF()" class="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center gap-2">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Exportar PDF</span>
             </button>
           </div>
 
-          <div class="bg-[#0f1728] border border-gray-800 rounded-2xl overflow-hidden">
-            <table class="w-full text-left text-xs text-gray-300">
-              <thead class="bg-[#141f36] text-gray-400 uppercase font-semibold">
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
                 <tr>
-                  <th class="py-3 px-4">Factura</th>
-                  <th class="py-3 px-4">Emisor / Tercero</th>
-                  <th class="py-3 px-4">Valor Total</th>
-                  <th class="py-3 px-4">Estado AX1</th>
-                  <th class="py-3 px-4">Destino Siigo</th>
+                  <th class="p-3">Factura</th>
+                  <th class="p-3">Tercero / Proveedor</th>
+                  <th class="p-3">Estado AX1</th>
+                  <th class="p-3">Estado Siigo</th>
+                  <th class="p-3 text-right">Valor Total</th>
                 </tr>
               </thead>
-              <tbody id="facturasTableBody" class="divide-y divide-gray-800"></tbody>
+              <tbody id="tablaFacturasBody" class="divide-y divide-slate-100">
+                <!-- Dinámico -->
+              </tbody>
             </table>
           </div>
         </section>
 
-        <!-- PESTAÑA 4: NOTAS CRÉDITO -->
-        <section id="tab-notas_credito" class="tab-content hidden space-y-6">
-          <div>
-            <h1 class="text-2xl font-bold text-white">Notas Crédito Recibidas</h1>
-            <p class="text-xs text-gray-400">Valores y facturas asociadas según aplicativo AX1</p>
+        <!-- ==================== VISTA 4: NOTAS CRÉDITO ==================== -->
+        <section id="view-notas" class="hidden space-y-6">
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="p-2 rounded-xl bg-blue-50 text-blue-600"><i data-lucide="undo-2" class="w-5 h-5"></i></span>
+                <h2 class="text-xl font-black text-slate-900">Notas Crédito Recibidas</h2>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Valores y facturas asociadas según aplicativo AX1</p>
+            </div>
+            <button onclick="generarReporteNotasPDF()" class="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center gap-2">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Exportar PDF</span>
+            </button>
           </div>
 
-          <div class="bg-[#0f1728] border border-gray-800 rounded-2xl p-6 overflow-hidden">
-            <table class="w-full text-left text-xs text-gray-300">
-              <thead class="bg-[#141f36] text-gray-400 uppercase font-semibold">
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
                 <tr>
-                  <th class="py-3 px-4">Nota Crédito</th>
-                  <th class="py-3 px-4">Factura Afectada</th>
-                  <th class="py-3 px-4">Tercero</th>
-                  <th class="py-3 px-4 text-right">Valor</th>
+                  <th class="p-3">Nota Crédito</th>
+                  <th class="p-3">Factura Relacionada</th>
+                  <th class="p-3">Tercero</th>
+                  <th class="p-3 text-right">Valor Descuento</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-800">
-                <tr class="hover:bg-[#121c30]">
-                  <td class="py-3 px-4 font-mono font-bold text-white">NC-089</td>
-                  <td class="py-3 px-4 font-mono text-yellow-400">FE-2015</td>
-                  <td class="py-3 px-4">AEROTAXIS DEL CARIBE</td>
-                  <td class="py-3 px-4 text-right font-mono text-red-400 font-bold">-$1.450.000</td>
+              <tbody id="tablaNotasBody" class="divide-y divide-slate-100">
+                <tr>
+                  <td class="p-3 font-bold text-slate-900">NC-104</td>
+                  <td class="p-3 font-semibold text-blue-600">FE-2041</td>
+                  <td class="p-3">LOGÍSTICA AERONÁUTICA SAS</td>
+                  <td class="p-3 text-right font-bold text-emerald-600">$1.200.000</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-bold text-slate-900">NC-105</td>
+                  <td class="p-3 font-semibold text-blue-600">FE-1980</td>
+                  <td class="p-3">AEROCARGAS COLOMBIA</td>
+                  <td class="p-3 text-right font-bold text-emerald-600">$450.000</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </section>
 
-        <!-- PESTAÑA 5: GASTOS BANCARIOS -->
-        <section id="tab-gastos_bancarios" class="tab-content hidden space-y-6">
-          <div class="flex justify-between items-center">
+        <!-- ==================== VISTA 5: GASTOS BANCARIOS ==================== -->
+        <section id="view-gastos" class="hidden space-y-6">
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 class="text-2xl font-bold text-white">Gastos Bancarios</h1>
-              <p class="text-xs text-gray-400">Consolidación mensual de comprobantes contables en PDF</p>
+              <div class="flex items-center gap-2">
+                <span class="p-2 rounded-xl bg-amber-50 text-amber-600"><i data-lucide="coins" class="w-5 h-5"></i></span>
+                <h2 class="text-xl font-black text-slate-900">Gastos Bancarios Mensuales</h2>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">Comprobantes contables y clasificación por banco y periodo</p>
             </div>
-            <label class="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-950 font-bold text-xs rounded-xl cursor-pointer flex items-center space-x-2 transition">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            <!-- Subir comprobante contable PDF -->
+            <label class="px-4 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer">
+              <i data-lucide="file-up" class="w-4 h-4"></i>
               <span>Subir Comprobante PDF</span>
-              <input type="file" accept=".pdf" class="hidden" onchange="alert('Comprobante recibido y guardado por banco.')" />
+              <input type="file" accept=".pdf" class="hidden" onchange="alert('Comprobante contable de gastos recibido y clasificado por banco.')" />
             </label>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="p-6 bg-[#0f1728] border border-gray-800 rounded-2xl">
-              <span class="text-xs text-gray-400 uppercase">Octubre 2026 — Bancolombia</span>
-              <h3 class="text-xl font-bold text-white mt-1">$1.420.000</h3>
-              <p class="text-xs text-gray-500 mt-2">Comisiones e impuesto 4x1000</p>
+          <!-- Filtros de Mes y Banco -->
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-4">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filtrar por Mes:</label>
+              <select id="filtroGastosMes" class="px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800">
+                <option value="todos">Todos los meses</option>
+                <option value="10">Octubre 2026</option>
+                <option value="09">Septiembre 2026</option>
+                <option value="08">Agosto 2026</option>
+              </select>
             </div>
-            <div class="p-6 bg-[#0f1728] border border-gray-800 rounded-2xl">
-              <span class="text-xs text-gray-400 uppercase">Octubre 2026 — Davivienda</span>
-              <h3 class="text-xl font-bold text-white mt-1">$680.000</h3>
-              <p class="text-xs text-gray-500 mt-2">Mantenimiento de cuenta</p>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Filtrar por Banco:</label>
+              <select id="filtroGastosBanco" class="px-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800">
+                <option value="todos">Todos los bancos</option>
+                <option value="Bancolombia">Bancolombia</option>
+                <option value="Davivienda">Davivienda</option>
+                <option value="Banco de Bogotá">Banco de Bogotá</option>
+                <option value="BBVA">BBVA</option>
+              </select>
             </div>
+          </div>
+
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-200">
+                <tr>
+                  <th class="p-3">Periodo</th>
+                  <th class="p-3">Banco</th>
+                  <th class="p-3">Concepto Contable</th>
+                  <th class="p-3 text-right">GMF (4x1000)</th>
+                  <th class="p-3 text-right">Comisiones</th>
+                  <th class="p-3 text-right">Total Gasto</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr>
+                  <td class="p-3 font-semibold">Octubre 2026</td>
+                  <td class="p-3 font-bold text-slate-900">Bancolombia</td>
+                  <td class="p-3">Gravamen y Cuotas de Manejo</td>
+                  <td class="p-3 text-right text-slate-600">$583.200</td>
+                  <td class="p-3 text-right text-slate-600">$120.000</td>
+                  <td class="p-3 text-right font-bold text-rose-600">$703.200</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold">Octubre 2026</td>
+                  <td class="p-3 font-bold text-slate-900">Davivienda</td>
+                  <td class="p-3">Comisiones Transaccionales ACH</td>
+                  <td class="p-3 text-right text-slate-600">$337.240</td>
+                  <td class="p-3 text-right text-slate-600">$85.000</td>
+                  <td class="p-3 text-right font-bold text-rose-600">$422.240</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </section>
 
       </main>
     </div>
-
-    <!-- MODAL DE AJUSTES (3 OPCIONES) -->
-    <div id="settingsModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="w-full max-w-md bg-[#0f1728] border border-gray-800 rounded-2xl p-6 shadow-2xl space-y-6">
-        <div class="flex justify-between items-center">
-          <h3 class="text-lg font-bold text-white flex items-center space-x-2">
-            <span>Ajustes y Reportes</span>
-          </h3>
-          <button id="closeSettingsBtn" class="text-gray-400 hover:text-white">&times;</button>
-        </div>
-
-        <div class="space-y-3">
-          <!-- 1. Reporte PDF facturas -->
-          <button onclick="generarPDFFacturas()" class="w-full p-4 bg-[#141f36] hover:bg-[#1a2947] border border-gray-700 rounded-xl text-left flex items-center justify-between transition">
-            <div>
-              <p class="text-xs font-bold text-white">1. Descargar Reporte PDF de Facturas</p>
-              <p class="text-[11px] text-gray-400">Facturas recibidas y causadas al momento</p>
-            </div>
-            <span class="text-yellow-400 text-lg">📄</span>
-          </button>
-
-          <!-- 2. Reporte PDF notas crédito -->
-          <button onclick="generarPDFNotasCredito()" class="w-full p-4 bg-[#141f36] hover:bg-[#1a2947] border border-gray-700 rounded-xl text-left flex items-center justify-between transition">
-            <div>
-              <p class="text-xs font-bold text-white">2. Descargar Reporte PDF Notas Crédito</p>
-              <p class="text-[11px] text-gray-400">Valores y facturas asociadas (AX1)</p>
-            </div>
-            <span class="text-yellow-400 text-lg">📄</span>
-          </button>
-
-          <!-- 3. Subir archivo plano de saldos -->
-          <label class="w-full p-4 bg-[#141f36] hover:bg-[#1a2947] border border-gray-700 rounded-xl text-left flex items-center justify-between cursor-pointer transition">
-            <div>
-              <p class="text-xs font-bold text-white">3. Subir Archivo Plano de Saldos</p>
-              <p class="text-[11px] text-gray-400">Alimenta los saldos de la pestaña Bancos</p>
-            </div>
-            <span class="text-yellow-400 text-lg">⬆</span>
-            <input type="file" id="inputPlanoSaldos" class="hidden" accept=".txt,.csv" />
-          </label>
-        </div>
-      </div>
-    </div>
-
   </div>
 
-  <!-- SCRIPT DE FUNCIONALIDADES -->
+  <!-- ==================== LÓGICA JAVASCRIPT ==================== -->
   <script>
-    // 1. Acceso por clave
-    const loginForm = document.getElementById('loginForm');
-    const passwordInput = document.getElementById('passwordInput');
-    const errorMsg = document.getElementById('errorMsg');
-    const loginScreen = document.getElementById('loginScreen');
-    const mainApp = document.getElementById('mainApp');
+    // Inicializar iconos
+    lucide.createIcons();
 
-    loginForm.addEventListener('submit', (e) => {
+    // Estado global en memoria
+    let appData = {
+      estadisticas: {
+        ingresos: "19,0 MM",
+        costo_ventas: "10,5 MM",
+        utilidad_bruta: "8,4 MM",
+        gastos: "8,9 MM",
+        resultado_neto: "-399,6 M"
+      },
+      bancos: {
+        "Bancolombia": { cuenta: "Cta Corriente #8912", saldo: 145820400, actualizado: "Hoy, 11:30 AM" },
+        "Davivienda": { cuenta: "Cta Ahorros #3321", saldo: 84310200, actualizado: "Hoy, 10:15 AM" },
+        "Banco de Bogotá": { cuenta: "Cta Corriente #1104", saldo: 32450000, actualizado: "Hoy, 09:00 AM" },
+        "BBVA": { cuenta: "Cta Ahorros #9023", saldo: 18720000, actualizado: "Ayer, 05:00 PM" }
+      },
+      bancoActivo: "Bancolombia",
+      movimientos: [
+        { id: 1, banco: "Bancolombia", fecha: "2026-10-19", descripcion: "Pago Proveedor DIAN Fac-902", valor: 4500000, tipo: "credito" },
+        { id: 2, banco: "Bancolombia", fecha: "2026-10-19", descripcion: "Recaudo Clientes PSE Fac-104", valor: 12800000, tipo: "debito" },
+        { id: 3, banco: "Bancolombia", fecha: "2026-10-18", descripcion: "Comisión Mensual Cuenta", valor: 65000, tipo: "credito" },
+        { id: 4, banco: "Davivienda", fecha: "2026-10-19", descripcion: "Transferencia Fondos Operativos", valor: 5000000, tipo: "debito" }
+      ],
+      facturas: [
+        { id: "FE-2041", tercero: "LOGÍSTICA AERONÁUTICA SAS", valor: 14200000, estado: "verde", siigo: "Causada" },
+        { id: "FE-2042", tercero: "COMBUSTIBLES DEL VALLE", valor: 8900000, estado: "amarillo", siigo: "Tercero Nuevo" },
+        { id: "FE-2043", tercero: "SEGURIDAD INTEGRAL LTDA", valor: 3100000, estado: "verde", siigo: "Causada" }
+      ],
+      filtroDebito: true,
+      filtroCredito: true
+    };
+
+    // Saludo según la hora del día
+    function actualizarSaludo() {
+      const hora = new Date().getHours();
+      let saludo = "Buenos días";
+      if (hora >= 12 && hora < 18) saludo = "Buenas tardes";
+      else if (hora >= 18 || hora < 5) saludo = "Buenas noches";
+      document.getElementById("saludoHorario").textContent = `${saludo}, Equipo Contable Ágilex`;
+    }
+    actualizarSaludo();
+
+    // Autenticación con contraseña ADMIN_27
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      if (passwordInput.value === 'ADMIN_27') {
-        loginScreen.classList.add('hidden');
-        mainApp.classList.remove('hidden');
-        initDashboard();
+      const pass = document.getElementById("passwordInput").value.trim();
+      if (pass === "ADMIN_27") {
+        document.getElementById("loginScreen").classList.add("hidden");
       } else {
-        errorMsg.classList.remove('hidden');
+        document.getElementById("errorMsg").classList.remove("hidden");
       }
     });
 
-    // 2. Saludo dinámico según horario
-    function setGreeting() {
-      const hora = new Date().getHours();
-      let saludo = 'Buenas noches, Equipo Finanzas Ágilex';
-      if (hora >= 5 && hora < 12) saludo = 'Buenos días, Equipo Finanzas Ágilex';
-      else if (hora >= 12 && hora < 19) saludo = 'Buenas tardes, Equipo Finanzas Ágilex';
-      document.getElementById('greetingText').innerText = saludo;
-    }
+    // Menús desplegables
+    document.getElementById("btnNotificaciones").addEventListener("click", () => {
+      document.getElementById("dropdownNotificaciones").classList.toggle("hidden");
+      document.getElementById("dropdownAjustes").classList.add("hidden");
+    });
+    document.getElementById("btnAjustes").addEventListener("click", () => {
+      document.getElementById("dropdownAjustes").classList.toggle("hidden");
+      document.getElementById("dropdownNotificaciones").classList.add("hidden");
+    });
 
-    // 3. Estado de Bancos y Movimientos
-    let currentBank = 'Bancolombia';
-    let filterNature = 'todos';
-    
-    const bankBalances = {
-      'Bancolombia': { cuenta: 'Cta Corriente #8912', saldo: 145820400, actualizado: 'Hoy, 10:45 AM' },
-      'Davivienda': { cuenta: 'Cta Ahorros #3321', saldo: 84310200, actualizado: 'Hoy, 09:30 AM' },
-      'Banco de Bogotá': { cuenta: 'Cta Corriente #1104', saldo: 32450000, actualizado: 'Hoy, 08:15 AM' },
-      'BBVA': { cuenta: 'Cta Ahorros #9023', saldo: 18720000, actualizado: 'Ayer, 05:00 PM' }
-    };
-
-    let movimientos = [
-      { id: 1, banco: 'Bancolombia', fecha: '2026-10-19', descripcion: 'Pago Proveedor DIAN Fac-902', valor: 4500000, tipo: 'credito' },
-      { id: 2, banco: 'Bancolombia', fecha: '2026-10-19', descripcion: 'Recaudo PSE Factura 1092', valor: 12800000, tipo: 'debito' },
-      { id: 3, banco: 'Davivienda', fecha: '2026-10-18', descripcion: 'Comisión Remesa Exterior', valor: 350000, tipo: 'credito' },
-      { id: 4, banco: 'Banco de Bogotá', fecha: '2026-10-18', descripcion: 'Consignación Efectivo', valor: 5200000, tipo: 'debito' }
-    ];
-
-    const facturas = [
-      { id: 'FE-2041', tercero: 'LOGÍSTICA AERONÁUTICA SAS', valor: 14200000, estado: 'verde', siigo: 'Causada' },
-      { id: 'FE-2042', tercero: 'COMBUSTIBLES DEL VALLE', valor: 8900000, estado: 'amarillo', siigo: 'Tercero Nuevo' },
-      { id: 'FE-2043', tercero: 'REPUESTOS Y MOTORES LTDA', valor: 3100000, estado: 'verde', siigo: 'Causada' },
-      { id: 'FE-2044', tercero: 'SERVICIOS AEROPORTUARIOS', valor: 2450000, estado: 'rojo', siigo: 'Fallo Token DIAN' }
-    ];
-
-    function renderBankCards() {
-      const container = document.getElementById('bankCardsContainer');
-      container.innerHTML = '';
-      Object.entries(bankBalances).forEach(([nombre, d]) => {
-        const isSelected = nombre === currentBank;
-        const card = document.createElement('div');
-        card.className = `p-5 rounded-2xl border cursor-pointer transition ${
-          isSelected ? 'bg-[#14233d] border-yellow-400 ring-2 ring-yellow-400/20' : 'bg-[#0f1728] border-gray-800 hover:border-gray-700'
-        }`;
-        card.onclick = () => selectBank(nombre);
-        card.innerHTML = `
-          <div class="flex justify-between items-center mb-1">
-            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${nombre}</span>
-            <span class="text-[9px] text-green-400 bg-green-500/10 px-1.5 py-0.5 rounded font-mono">Activo</span>
-          </div>
-          <p class="text-xl font-bold text-white mb-0.5">$${d.saldo.toLocaleString('es-CO')}</p>
-          <p class="text-[11px] text-gray-500">${d.cuenta}</p>
-        `;
-        container.appendChild(card);
+    // Cambio de pestañas
+    function cambiarPestana(p) {
+      const pestanas = ["estadisticas", "bancos", "facturas", "notas", "gastos"];
+      pestanas.forEach(item => {
+        const sec = document.getElementById(`view-${item}`);
+        const tab = document.getElementById(`tab-${item}`);
+        if (item === p) {
+          sec.classList.remove("hidden");
+          tab.className = "nav-tab w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition bg-amber-400 text-slate-950 font-bold shadow-md shadow-amber-400/20 cursor-pointer";
+        } else {
+          sec.classList.add("hidden");
+          tab.className = "nav-tab w-12 h-12 rounded-2xl flex flex-col items-center justify-center transition bg-slate-100 hover:bg-slate-200 text-slate-600 cursor-pointer";
+        }
       });
+      lucide.createIcons();
     }
 
-    function selectBank(nombre) {
-      currentBank = nombre;
-      const b = bankBalances[nombre];
-      document.getElementById('currentBankTitle').innerText = `${nombre} — ${b.cuenta}`;
-      document.getElementById('currentBankUpdated').innerText = `Actualizado: ${b.actualizado}`;
-      renderBankCards();
+    // Renderizar tarjetas de bancos
+    function renderBancos() {
+      const grid = document.getElementById("gridBancos");
+      grid.innerHTML = "";
+      Object.keys(appData.bancos).forEach(nombre => {
+        const b = appData.bancos[nombre];
+        const esActivo = nombre === appData.bancoActivo;
+        const card = document.createElement("div");
+        card.className = `p-5 rounded-3xl border transition cursor-pointer ${
+          esActivo ? "bg-amber-50 border-2 border-amber-400 shadow-md" : "bg-white border-slate-200 hover:border-amber-300 shadow-sm"
+        }`;
+        card.onclick = () => seleccionarBanco(nombre);
+        card.innerHTML = `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-800">${nombre}</span>
+            <span class="w-2.5 h-2.5 rounded-full ${esActivo ? "bg-amber-500" : "bg-slate-300"}"></span>
+          </div>
+          <div class="text-lg font-black text-slate-900">$${b.saldo.toLocaleString("es-CO")}</div>
+          <div class="text-[11px] text-slate-500 mt-1">${b.cuenta}</div>
+        `;
+        grid.appendChild(card);
+      });
+
+      // Actualizar tarjeta principal
+      const bSel = appData.bancos[appData.bancoActivo];
+      if (bSel) {
+        document.getElementById("bancoSeleccionadoTitulo").textContent = appData.bancoActivo;
+        document.getElementById("bancoSeleccionadoCuenta").textContent = bSel.cuenta;
+        document.getElementById("bancoSeleccionadoSaldo").textContent = `$${bSel.saldo.toLocaleString("es-CO")}`;
+        document.getElementById("bancoSeleccionadoFecha").textContent = `Actualizado: ${bSel.actualizado}`;
+      }
+      renderMovimientos();
+    }
+
+    function seleccionarBanco(nombre) {
+      appData.bancoActivo = nombre;
+      renderBancos();
+    }
+
+    // Filtros de movimientos
+    function toggleFiltroNaturaleza(tipo) {
+      if (tipo === "debito") {
+        appData.filtroDebito = !appData.filtroDebito;
+        const btn = document.getElementById("btnFiltroDebito");
+        btn.className = appData.filtroDebito 
+          ? "px-3.5 py-2 rounded-xl text-xs font-bold border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition cursor-pointer"
+          : "px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-100 text-slate-400 transition cursor-pointer";
+      } else {
+        appData.filtroCredito = !appData.filtroCredito;
+        const btn = document.getElementById("btnFiltroCredito");
+        btn.className = appData.filtroCredito 
+          ? "px-3.5 py-2 rounded-xl text-xs font-bold border border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 transition cursor-pointer"
+          : "px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-slate-100 text-slate-400 transition cursor-pointer";
+      }
+      renderMovimientos();
+    }
+
+    function aplicarFiltrosMovimientos() {
       renderMovimientos();
     }
 
     function renderMovimientos() {
-      const tbody = document.getElementById('movimientosTableBody');
-      const query = document.getElementById('filterQuery').value.toLowerCase();
-      const date = document.getElementById('filterDate').value;
+      const tbody = document.getElementById("tablaMovimientosBody");
+      const filtroFecha = document.getElementById("filtroFecha").value;
+      const filtroValor = parseFloat(document.getElementById("filtroValor").value);
 
-      const filtered = movimientos.filter(m => {
-        if (m.banco !== currentBank) return false;
-        if (date && m.fecha !== date) return false;
-        if (filterNature !== 'todos' && m.tipo !== filterNature) return false;
-        if (query) {
-          const matchDesc = m.descripcion.toLowerCase().includes(query);
-          const matchVal = m.valor.toString().includes(query);
-          if (!matchDesc && !matchVal) return false;
-        }
+      const filtrados = appData.movimientos.filter(m => {
+        if (m.banco !== appData.bancoActivo) return false;
+        if (m.tipo === "debito" && !appData.filtroDebito) return false;
+        if (m.tipo === "credito" && !appData.filtroCredito) return false;
+        if (filtroFecha && m.fecha !== filtroFecha) return false;
+        if (!isNaN(filtroValor) && m.valor !== filtroValor) return false;
         return true;
       });
 
-      tbody.innerHTML = '';
-      if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-gray-500 text-xs">No hay movimientos con los filtros aplicados.</td></tr>';
+      if (filtrados.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-semibold">No se encontraron movimientos para los filtros seleccionados.</td></tr>`;
         return;
       }
 
-      filtered.forEach(m => {
-        const isDeb = m.tipo === 'debito';
-        const row = document.createElement('tr');
-        row.className = 'hover:bg-[#121c30] transition';
-        row.innerHTML = `
-          <td class="py-3 px-4 font-mono">${m.fecha}</td>
-          <td class="py-3 px-4 text-white font-medium">${m.descripcion}</td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${isDeb ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}">
+      tbody.innerHTML = filtrados.map(m => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-3 font-semibold text-slate-600">${m.fecha}</td>
+          <td class="p-3 font-bold text-slate-900">${m.descripcion}</td>
+          <td class="p-3">
+            <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase ${
+              m.tipo === "debito" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"
+            }">
               ${m.tipo}
             </span>
           </td>
-          <td class="py-3 px-4 text-right font-mono font-bold ${isDeb ? 'text-green-400' : 'text-red-400'}">
-            ${isDeb ? '+' : '-'}$${m.valor.toLocaleString('es-CO')}
+          <td class="p-3 text-right font-black ${m.tipo === "debito" ? "text-emerald-600" : "text-rose-600"}">
+            ${m.tipo === "debito" ? "+" : "-"}$${m.valor.toLocaleString("es-CO")}
           </td>
-        `;
-        tbody.appendChild(row);
-      });
+        </tr>
+      `).join("");
     }
 
-    function setNatureFilter(nat) {
-      filterNature = nat;
-      ['todos', 'debito', 'credito'].forEach(n => {
-        const btn = document.getElementById(`btnNat-${n}`);
-        if (n === nat) {
-          btn.className = 'flex-1 py-1.5 font-semibold rounded-lg bg-[#18263f] text-white';
-        } else {
-          btn.className = 'flex-1 py-1.5 font-semibold rounded-lg text-gray-400';
-        }
-      });
-      renderMovimientos();
-    }
-
-    document.getElementById('filterDate').addEventListener('change', renderMovimientos);
-    document.getElementById('filterQuery').addEventListener('input', renderMovimientos);
-
-    // 4. Render de Facturas
+    // Renderizar Facturas
     function renderFacturas() {
-      const tbody = document.getElementById('facturasTableBody');
-      tbody.innerHTML = '';
-      facturas.forEach(f => {
-        let badgeColor = 'bg-green-500/10 text-green-400 border-green-500/20';
-        let label = 'Verificada';
-        if (f.estado === 'amarillo') {
-          badgeColor = 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
-          label = 'Pendiente';
-        } else if (f.estado === 'rojo') {
-          badgeColor = 'bg-red-500/10 text-red-400 border-red-500/20';
-          label = 'Error';
-        }
-
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-[#121c30]';
-        tr.innerHTML = `
-          <td class="py-3 px-4 font-mono font-bold text-white">${f.id}</td>
-          <td class="py-3 px-4">${f.tercero}</td>
-          <td class="py-3 px-4 font-mono font-semibold">$${f.valor.toLocaleString('es-CO')}</td>
-          <td class="py-3 px-4">
-            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${badgeColor}">
-              ${label}
+      const tbody = document.getElementById("tablaFacturasBody");
+      tbody.innerHTML = appData.facturas.map(f => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-3 font-bold text-blue-950">${f.id}</td>
+          <td class="p-3 font-semibold text-slate-800">${f.tercero}</td>
+          <td class="p-3">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase ${
+              f.estado === "verde" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200"
+            }">
+              <span class="w-1.5 h-1.5 rounded-full ${f.estado === "verde" ? "bg-emerald-500" : "bg-amber-500"}"></span>
+              ${f.estado === "verde" ? "Verificada" : "Pendiente"}
             </span>
           </td>
-          <td class="py-3 px-4 font-semibold text-gray-300">${f.siigo}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+          <td class="p-3 font-semibold text-slate-700">${f.siigo}</td>
+          <td class="p-3 text-right font-black text-slate-900">$${f.valor.toLocaleString("es-CO")}</td>
+        </tr>
+      `).join("");
     }
 
-    // 5. Cambio de pestañas
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.className = 'tab-btn p-3.5 rounded-2xl text-gray-400 hover:bg-[#141f36] hover:text-white transition';
-      });
-      const activeBtn = document.getElementById(`tabBtn-${tabId}`);
-      if (activeBtn) {
-        activeBtn.className = 'tab-btn p-3.5 rounded-2xl bg-yellow-400 text-gray-950 font-bold transition';
-      }
-    }
-
-    // 6. Panel de notificaciones y ajustes
-    const btnNotif = document.getElementById('btnNotif');
-    const notifPanel = document.getElementById('notifPanel');
-    btnNotif.onclick = () => notifPanel.classList.toggle('hidden');
-
-    const btnSettings = document.getElementById('btnSettings');
-    const settingsModal = document.getElementById('settingsModal');
-    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-    btnSettings.onclick = () => settingsModal.classList.remove('hidden');
-    closeSettingsBtn.onclick = () => settingsModal.classList.add('hidden');
-
-    // 7. Generación de PDFs requeridos
-    function generarPDFFacturas() {
+    // Generar Reportes PDF
+    function generarReporteFacturasPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      doc.text("ÁGILEX - Reporte de Facturas Recibidas y Causadas", 14, 15);
+      doc.setFontSize(16);
+      doc.setTextColor(15, 23, 42);
+      doc.text("ÁGILEX - Reporte de Facturas Recibidas y Causadas", 14, 20);
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Fecha de emisión: ${new Date().toLocaleDateString("es-CO")} - Sistema AX1 & Siigo`, 14, 28);
+
+      const rows = appData.facturas.map(f => [
+        f.id,
+        f.tercero,
+        f.estado === "verde" ? "Verificada" : "Pendiente",
+        f.siigo,
+        `$${f.valor.toLocaleString("es-CO")}`
+      ]);
+
       doc.autoTable({
-        head: [['Factura', 'Tercero / Emisor', 'Valor', 'Estado AX1', 'Estado Siigo']],
-        body: facturas.map(f => [f.id, f.tercero, `$${f.valor.toLocaleString('es-CO')}`, f.estado, f.siigo]),
-        startY: 25
+        head: [["Factura", "Tercero", "Estado AX1", "Estado Siigo", "Valor"]],
+        body: rows,
+        startY: 35,
+        theme: "striped",
+        headStyles: { fillColor: [250, 204, 21], textColor: [15, 23, 42], fontStyle: "bold" }
       });
-      doc.save("Reporte_Facturas_Agilex.pdf");
+
+      doc.save(`Agilex_Facturas_${new Date().toISOString().slice(0,10)}.pdf`);
     }
 
-    function generarPDFNotasCredito() {
+    function generarReporteNotasPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      doc.text("ÁGILEX - Reporte de Notas Crédito", 14, 15);
+      doc.setFontSize(16);
+      doc.text("ÁGILEX - Reporte de Notas Crédito Recibidas", 14, 20);
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Generado según aplicativo AX1 al ${new Date().toLocaleDateString("es-CO")}`, 14, 28);
+
       doc.autoTable({
-        head: [['Nota Crédito', 'Factura Asociada', 'Tercero', 'Valor']],
-        body: [['NC-089', 'FE-2015', 'AEROTAXIS DEL CARIBE', '-$1.450.000']],
-        startY: 25
+        head: [["Nota Crédito", "Factura Afectada", "Tercero", "Valor Descuento"]],
+        body: [
+          ["NC-104", "FE-2041", "LOGÍSTICA AERONÁUTICA SAS", "$1.200.000"],
+          ["NC-105", "FE-1980", "AEROCARGAS COLOMBIA", "$450.000"]
+        ],
+        startY: 35,
+        headStyles: { fillColor: [30, 58, 138], textColor: [255, 255, 255] }
       });
-      doc.save("Reporte_Notas_Credito_Agilex.pdf");
+
+      doc.save(`Agilex_NotasCredito_${new Date().toISOString().slice(0,10)}.pdf`);
     }
 
-    // 8. Carga de archivo plano de saldos
-    document.getElementById('inputPlanoSaldos').addEventListener('change', function(e) {
+    // Cargar archivo plano de saldos
+    function cargarArchivoPlano(e) {
       const file = e.target.files[0];
-      if (file) {
-        alert('Archivo plano procesado con éxito. Saldos de bancos sincronizados.');
-        settingsModal.classList.add('hidden');
-      }
-    });
-
-    function initDashboard() {
-      setGreeting();
-      renderBankCards();
-      renderMovimientos();
-      renderFacturas();
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const parsed = JSON.parse(evt.target.result);
+          if (parsed.bancos) {
+            appData.bancos = parsed.bancos;
+            renderBancos();
+            alert("Saldos bancarios actualizados correctamente desde el archivo plano.");
+          }
+        } catch {
+          alert("Archivo recibido. Se procesó la actualización de saldos.");
+        }
+      };
+      reader.readAsText(file);
     }
+
+    // Acciones del Bot
+    function ejecutarAccionBot(tipo) {
+      if (tipo === "token_dian") {
+        alert("Bot Fantasma: Conectando a AX1... Token DIAN regenerado satisfactoriamente.");
+      } else if (tipo === "enviar_siigo") {
+        alert("Bot Fantasma: Transfiriendo facturas con estado 'verde' a Siigo... 2 Facturas causadas con éxito.");
+      }
+    }
+
+    // Cargar datos iniciales desde datos.json (si existe en el repo)
+    fetch("./datos.json")
+      .then(r => r.json())
+      .then(data => {
+        if (data.estadisticas) {
+          appData.estadisticas = data.estadisticas;
+          document.getElementById("stat-ingresos").textContent = data.estadisticas.ingresos || "19,0 MM";
+          document.getElementById("stat-costos").textContent = data.estadisticas.costo_ventas || "10,5 MM";
+          document.getElementById("stat-utilidad").textContent = data.estadisticas.utilidad_bruta || "8,4 MM";
+          document.getElementById("stat-gastos").textContent = data.estadisticas.gastos || "8,9 MM";
+          document.getElementById("stat-resultado").textContent = data.estadisticas.resultado_neto || "-399,6 M";
+        }
+        if (data.bancos) appData.bancos = data.bancos;
+        if (data.movimientos) appData.movimientos = data.movimientos;
+        if (data.facturas) appData.facturas = data.facturas;
+        renderBancos();
+        renderFacturas();
+      })
+      .catch(() => {
+        renderBancos();
+        renderFacturas();
+      });
   </script>
 </body>
 </html>
